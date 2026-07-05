@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pizza-ordering-sys-deploy
+  labels:
+    app: pizza-ordering-sys
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pizza-ordering-sys
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25
+      maxSurge: 25
+  template:
+    metadata:
+      name: pizza-ordering-sys-pod
+      labels:
+        app: pizza-ordering-sys
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: processor
+                  operator: In 
+                  values: 
+                    - amd
+      containers:
+        - name: pizza-ordering-sys-container
+          image: liteshz/pizza-paradise:v2
+          restartPolicy: OnFailure
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pizza-ordering-sys-svc
+spec:
+  type: NodePort
+  selector:
+    app: pizza-ordering-sys
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 80
+      nodePort: 32767

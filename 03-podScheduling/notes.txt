@@ -1,0 +1,1 @@
+k get no -o 'custom-columns=name:.metadata.name,taintsConfigured:.spec.taints'
