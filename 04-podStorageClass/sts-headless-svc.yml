@@ -1,39 +1,45 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: pizza-ordering-sys-deploy
+  name: pizza-ordering-sys
   labels:
     app: pizza-ordering-sys
 spec:
+  serviceName: pizza-ordering-sys-headless-svc
   replicas: 1
   selector:
     matchLabels:
       app: pizza-ordering-sys
   template:
     metadata:
-      name: pizza-ordering-sys-pod
       labels:
         app: pizza-ordering-sys
     spec:
+      restartPolicy: Always
       containers:
         - name: pizza-ordering-sys-container
           image: liteshz/pizza-paradise:v2
-          restartPolicy: OnFailure
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           volumeMounts:
             - name: htdocs-data
               mountPath: /usr/local/apache2/htdocs
+      initContainers:
         - name: busybox
           image: busybox:latest
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           command:
             - sh 
             - -c
           args:
             - |
               mkdir -p /usr/local/apache2/htdocs/host
-              echo "Running Pod IP: $(hostname -i)" > /usr/local/apache2/htdocs/host/index.html
+              echo "Running Pod IP: ${POD_IP}" > /usr/local/apache2/htdocs/host/index.html
           volumeMounts:
             - name: htdocs-data
               mountPath: /usr/local/apache2/htdocs
@@ -60,5 +66,5 @@ spec:
     app: pizza-ordering-sys
   ports:
     - name: http
-      port: 8080
+      port: 80
       targetPort: 80
