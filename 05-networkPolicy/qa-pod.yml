@@ -1,10 +1,20 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: qa
+
+---
+
+apiVersion: v1
 kind: Pod
 metadata:
-  name: test-pod
+  name: qa-test-pod
+  namespace: qa
+  labels:
+    app: qa-test-pod
 spec:
   containers:
-    - name: test-container
+    - name: qa-test-container
       image: busybox
       command:
         - sh
@@ -13,7 +23,7 @@ spec:
         - |
           while true; do
             echo -e "Testing connectivity...\n\n"
-            if wget -qO- http://pizza-ordering-sys-svc.default.svc.cluster.local; then
+            if wget -T 3 -qO- http://pizza-ordering-sys-svc.default.svc.cluster.local; then
               echo -e "\n==================== Connection Allowed ====================== \n"
             else
               echo "\n==================== Blocked by NetworkPolicy ====================== \n"

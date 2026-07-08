@@ -20,10 +20,10 @@ spec:
       labels:
         app: pizza-ordering-sys
     spec:
+      restartPolicy: Always
       containers:
         - name: pizza-ordering-sys-container
           image: liteshz/pizza-paradise:v2
-          restartPolicy: OnFailure
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -56,5 +56,5 @@ spec:
     app: pizza-ordering-sys
   ports:
     - name: http
-      port: 8080
+      port: 80
       targetPort: 80
